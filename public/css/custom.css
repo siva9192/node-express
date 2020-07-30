@@ -7,15 +7,17 @@
 body {
     font-family: 'Poppins',
         sans-serif;
-    color: #fff;
-    background-color: crimson;
+    color: #111;
+    background-color: #eeeeee;
 
 }
 
-/* 
+
 .card {
     display: flex;
-    height: 100vh;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-} */
+}
+.card{
+    margin: 10px;
+}

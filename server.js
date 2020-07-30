@@ -1,12 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const exphbs = require("express-handlebars");
+const bodyParser = require('body-parser');
 const app = express();
+//import proofile schema
+require('./Model/Profile');
+let Profile =mongoose.model("profile");
 
 /* ======================MIDDLEWARE STARTS HERE BLOCK ===========================*/
 
 app.engine("handlebars", exphbs());
 app.set("view engine", "handlebars");
+//body parser middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 
 /*=======================ENDS MIDDLEWARE BLOCK =========================*/
 
@@ -31,7 +38,12 @@ mongoose.connect(
 );
 ///basic route
 app.get("/", (req, res) => {
-  res.render("./home");
+  //fetch data from database
+  Profile.find({}).lean().then (profile=>{
+    res.render('./home', {profile})
+  })
+  
+  .catch(err=>console.log(err));
 });
 
 /*===================ALL GET REQUEST ============*/
@@ -49,6 +61,43 @@ app.get("/add-profile", (req, res) => {
 });
 
 /*===================ALL GET REQUEST ends here ============*/
+
+// *   all post request code starts here   *//
+app.post("/create-profile", (req, res) => {
+  const { firstname, lastname, phone } = req.body;
+  let errors = [];
+  if (!firstname) {
+    errors.push({ text: "Firstname is Required!" });
+  }
+  if (!lastname) {
+    errors.push({ text: "Lastname is Required!" });
+  }
+  if (!phone) {
+    errors.push({ text: "phone is Required!" });
+  }
+  if (errors.length > 0) {
+    res.render("./profiles/addprofile-form", {
+      errors,
+      firstname,
+      lastname,
+      phone,
+    });
+  } else {
+    let newProfiles = {
+      firstname,
+      lastname,
+      phone,
+    };
+    // should have to save into database
+    new Profile(newProfiles)
+      .save()
+      .then((profile) => {
+        res.redirect("/", 201, { profile });
+      })
+      .catch((err) => console.log(err));
+  }
+});
+// *   all post request code ends here   *//
 
 
 //listen port
